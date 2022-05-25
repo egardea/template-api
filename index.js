@@ -44,7 +44,7 @@ APP.post('/templates/create', function(req, res) {
       
       axios(config)
       .then(function (response) {
-        res.send(response.status);
+        res.send(response);
       })
       .catch(function (error) {
         res.send(error);
