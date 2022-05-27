@@ -29,26 +29,26 @@ APP.get('/templates', function(req, res) {
         .catch(error => res.send(error));
 });
 
-APP.post('/templates/create', function(req, res) {
-    const body = req.body;
-
-      const config = {
-        method: 'post',
-        url: 'https://api.smooch.io/v1.1/apps/624ef518381a1400f3c59ec7/templates',
-        headers: { 
-          'Content-Type': 'application/json', 
-          'Authorization': `Basic ${process.env.BEARER_TOKEN}`
-        },
-        data: body
-      };
+APP.post('/create', function(req, res) {
+    const body = JSON.stringify(req.body);
+    console.log(body)
+    const config = {
+      url: 'https://api.smooch.io/v1.1/apps/624ef518381a1400f3c59ec7/templates',
+      method: 'post',
+      headers: { 
+        "Content-Type": "application/json", 
+        "Authorization": `Basic ${process.env.BEARER_TOKEN}`,
+      },
+      data: body,
+    };
       
-      axios(config)
-      .then(function (response) {
-        res.send(response);
-      })
-      .catch(function (error) {
-        res.send(error);
-      });
+    axios(config)
+    .then(function (response) {
+      res.send(response);
+    })
+    .catch(function (error) {
+      res.send(error);
+    });
 });
 
 APP.listen(port, () => {
