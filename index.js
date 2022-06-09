@@ -1,54 +1,40 @@
 require('dotenv').config();
-const SunshineConversationsApi = require('sunshine-conversations-client');
-const Axios = require('axios');
 const { default: axios } = require('axios');
+const SmoochCore = require('smooch-core');
 const express = require('express');
 const cors = require('cors');
-const defaultClient = SunshineConversationsApi.ApiClient.instance;
-const basicAuth = defaultClient.authentications['basicAuth'];
-basicAuth.username = process.env.USERNAME; // e.g. 'app_5deaa3531c7f940010cc4ba4'
-basicAuth.password = process.env.PASSWORD; // e.g. 'tHyBAxPQIX_8CQNEefdc8L8B'
 
-const apiInstance = new SunshineConversationsApi.MessagesApi();
 const port = process.env.PORT || 8000;
 const APP = express()
+let appId = null;
+let smooch;
 
 APP.use(cors());
 APP.use(express.json());
 
+APP.post('/', function(req, res) {
+  appId = req.body.appId;
+  smooch = new SmoochCore({keyId: req.body.key, secret: req.body.secret, scope: 'app'});
+});
+
 APP.get('/templates', function(req, res) {
-    axios('https://api.smooch.io/v1.1/apps/624ef518381a1400f3c59ec7/templates', {
-        method: 'GET',
-        headers: {
-            'Content-type': 'application/json',
-            "Authorization": `Basic ${process.env.BEARER_TOKEN}`
-        },
-        redirect: 'follow'
-    })
-        .then(result => res.send(result.data.templates))
-        .catch(error => res.send(error));
+  smooch.templates.list({
+    appId: appId,
+    props: {
+      limit: 100
+    }
+  })
+  .then(result => res.send(result))
+  .catch(error => res.send(error));
 });
 
 APP.post('/create', function(req, res) {
-    const body = JSON.stringify(req.body);
-    console.log(body)
-    const config = {
-      url: 'https://api.smooch.io/v1.1/apps/624ef518381a1400f3c59ec7/templates',
-      method: 'post',
-      headers: { 
-        "Content-Type": "application/json", 
-        "Authorization": `Basic ${process.env.BEARER_TOKEN}`,
-      },
-      data: body,
-    };
-      
-    axios(config)
-    .then(function (response) {
-      res.send(response);
+    smooch.templates.create({
+      appId: appId,
+      props: req.body
     })
-    .catch(function (error) {
-      res.send(error);
-    });
+    .then(result => res.send(result))
+    .catch(error => res.send(error));
 });
 
 APP.listen(port, () => {
